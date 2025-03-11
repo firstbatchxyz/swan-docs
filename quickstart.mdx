@@ -44,7 +44,7 @@ If you encounter any installation issues:
   </Accordion>
 </AccordionGroup>
 
-## Creating a Multi-Step Workflow
+## Creating a Workflow
 
 Before diving into pipelines, let's explore how to create a single workflow with multiple steps.
 
@@ -54,15 +54,15 @@ Before diving into pipelines, let's explore how to create a single workflow with
 from dria import Dria, WorkflowTemplate, Model
 ```
 
-### Define a Multi-Step Workflow
+### Define a Workflow
 
 ```python
 
-class MultiStepWorkflow(WorkflowTemplate):
+class Workflow(WorkflowTemplate):
     """
-    A workflow demonstrating multiple processing steps within a single workflow.
+    A workflow demonstrating processing steps within a single workflow.
 
-    This workflow shows how to define multiple sequential steps that build upon
+    This workflow shows how to define sequential steps that build upon
     each other, with each step taking the output of the previous step as input.
     """
 
@@ -98,10 +98,10 @@ class MultiStepWorkflow(WorkflowTemplate):
 
 ```
 
-### Run the Multi-Step Workflow
+### Run the Workflow
 
 ```python
-async def run_multi_step_example():
+async def run_workflow():
     dria = Dria()
 
     # Execute a single workflow with sequential steps
@@ -109,7 +109,7 @@ async def run_multi_step_example():
         inputs={
             "prompt": "Sustainable urban farming technologies"
         },
-        workflow=MultiStepWorkflow,  # Single workflow with multiple sequential steps
+        workflow=Workflow,  # Single workflow with multiple sequential steps
         models=Model.GEMINI,
     )
 
@@ -120,7 +120,7 @@ async def run_multi_step_example():
 if __name__ == "__main__":
     import asyncio
 
-    print(asyncio.run(run_multi_step_example()))
+    print(asyncio.run(run_workflow()))
 ```
 
 In this example:
