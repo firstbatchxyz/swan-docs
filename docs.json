@@ -80,7 +80,7 @@
       "anchors": [
         {
           "anchor": "GitHub",
-          "href": "https://github.com/firstbatch/dria",
+          "href": "https://github.com/firstbatchxyz",
           "icon": "github"
         },
         {
@@ -115,7 +115,7 @@
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/firstbatch/dria",
+      "github": "https://github.com/firstbatchxyz",
       "discord": "https://discord.gg/dria",
       "linkedin": "https://linkedin.com/company/firstbatch"
     }
