@@ -44,6 +44,91 @@ If you encounter any installation issues:
   </Accordion>
 </AccordionGroup>
 
+## Creating a Multi-Step Workflow
+
+Before diving into pipelines, let's explore how to create a single workflow with multiple steps.
+
+### Import Required Libraries
+
+```python
+from dria import Dria, WorkflowTemplate, Model
+```
+
+### Define a Multi-Step Workflow
+
+```python
+
+class MultiStepWorkflow(WorkflowTemplate):
+    """
+    A workflow demonstrating multiple processing steps within a single workflow.
+
+    This workflow shows how to define multiple sequential steps that build upon
+    each other, with each step taking the output of the previous step as input.
+    """
+
+    def define_workflow(self) -> None:
+        # Step 1: Generate initial ideas based on the prompt
+        idea_creation_step = self.add_step(
+            "Generate 3 creative ideas related to: {{prompt}}",
+            output="idea_creation"
+        )
+
+        # Step 2: Select the best idea from the generated list
+        idea_selection_step = self.add_step(
+            "Review these ideas:\n{{idea_creation}}\n\nSelect the most promising idea and explain why it stands out.",
+            output="idea_selection"
+        )
+
+        # Step 3: Expand the selected idea with more details
+        idea_expansion_step = self.add_step(
+            "Expand this idea with additional details, examples, and potential applications:\n{{idea_selection}}",
+            output="idea_expansion"
+        )
+
+        # Step 4: Create an outline for a full article
+        outline_creation_step = self.add_step(
+            "Create a detailed outline for an article based on this expanded idea:\n{{idea_expansion}}",
+            output="outline_creation"
+        )
+
+        # Connect the steps in a sequence
+        self.connect(idea_creation_step, idea_selection_step)
+        self.connect(idea_selection_step, idea_expansion_step)
+        self.connect(idea_expansion_step, outline_creation_step)
+
+```
+
+### Run the Multi-Step Workflow
+
+```python
+async def run_multi_step_example():
+    dria = Dria()
+
+    # Execute a single workflow with sequential steps
+    result = await dria.generate(
+        inputs={
+            "prompt": "Sustainable urban farming technologies"
+        },
+        workflow=MultiStepWorkflow,  # Single workflow with multiple sequential steps
+        models=Model.GEMINI,
+    )
+
+    # The result will be a single output (the article outline)
+    return result
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    print(asyncio.run(run_multi_step_example()))
+```
+
+In this example:
+- We define a single workflow with 4 sequential steps that execute in order
+- Each step builds on the output of the previous step using the `{{$last_result}}` template variable
+- The special `$last_result` template variable automatically inserts the output from the previous step
+- The callback simply returns the final result (the article outline), as we're interested in the end product of this sequential process
+
 ## Your First Dria Workflow Pipeline
 
 Let's create a simple pipeline that generates variations of a given instruction and then executes them.
