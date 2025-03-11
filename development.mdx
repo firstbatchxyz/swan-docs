@@ -217,79 +217,53 @@ These workflow patterns can be combined and nested to create sophisticated data 
 For generating data in specific formats:
 
 ```python
-from dria.functions import structured_output
+from typing import List, Any
 
-# Define the output schema
-schema = {
-    "type": "object",
-    "properties": {
-        "title": {"type": "string"},
-        "sections": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "heading": {"type": "string"},
-                    "content": {"type": "string"}
-                }
-            }
+from pydantic import Field
+from pydantic import BaseModel
+
+from dria import Dria, WorkflowTemplate, Model, TaskResult
+
+
+class StoryOutput(BaseModel):
+    """Output schema for story generation."""
+    title: str = Field(..., description="The title of the story")
+    characters: List[str] = Field(..., description="Main characters in the story")
+    story_text: str = Field(..., description="The full text of the generated story")
+
+
+class SimpleStoryWorkflow(WorkflowTemplate):
+    max_tokens = 5000
+    def define_workflow(self) -> None:
+        self.add_step(
+            """Write a short story about {{topic}} that involves {{setting}}.
+            Include at least {{num_characters}} character(s).""",
+            schema=StoryOutput
+        )
+
+
+async def main():
+    """
+    Main function to demonstrate the execution of a custom workflow.
+
+    Initializes the Dria client, configures a workflow with inputs,
+    and executes it with the specified model.
+    """
+    dria = Dria()
+    return await dria.generate(
+        inputs={
+            "topic": "robot learning to paint",
+            "setting": "space",
+            "num_characters": "2"
         },
-        "tags": {
-            "type": "array",
-            "items": {"type": "string"}
-        }
-    }
-}
+        workflow=SimpleStoryWorkflow,
+        models=Model.GEMINI_20_FLASH
+    )
 
-# Use structured output in your workflow
-builder = WorkflowBuilder(instruction="Write an article about AI")
 
-builder.generative_step(
-    id="generate_structured_article",
-    prompt="Write an article about {{instruction}} with sections and tags",
-    operator=Operator.GENERATION,
-    function=structured_output(schema),
-    outputs=[Write.new("structured_article")],
-)
-
-flow = [Edge(source="generate_structured_article", target="_end")]
-builder.flow(flow)
-```
-
-## Model Selection
-
-Dria allows you to select specific models for different tasks in your workflows.
-
-```python
-from dria.models import ModelSelector
-
-# Create a workflow with specific model selection
-builder = WorkflowBuilder(instruction="Analyze complex scientific text")
-
-# Use a powerful model for complex analysis
-builder.generative_step(
-    id="complex_analysis",
-    prompt="Provide a detailed analysis of this scientific concept: {{instruction}}",
-    operator=Operator.GENERATION,
-    model=ModelSelector.claude_3_opus(),  # Specify a powerful model
-    outputs=[Write.new("analysis")],
-)
-
-# Use a faster model for summarization
-builder.generative_step(
-    id="summarize",
-    prompt="Summarize this analysis in simple terms: {{analysis}}",
-    operator=Operator.GENERATION,
-    model=ModelSelector.claude_3_haiku(),  # Specify a faster model
-    outputs=[Write.new("summary")],
-)
-
-flow = [
-    Edge(source="complex_analysis", target="summarize"),
-    Edge(source="summarize", target="_end")
-]
-
-builder.flow(flow)
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
 ```
 
 ## Next Steps
