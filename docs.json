@@ -109,8 +109,8 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Get Started",
-      "href": "https://dashboard.mintlify.com/quickstart"
+      "label": "Run a Node",
+      "href": "https://github.com/firstbatchxyz/dkn-compute-node"
     }
   },
   "footer": {
