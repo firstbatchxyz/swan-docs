@@ -7,16 +7,55 @@ description: "The synthetic data infrastructure for AI development"
 
 Dria is a comprehensive synthetic data infrastructure platform designed to revolutionize AI development. It provides a unique ecosystem where data quality, diversity, and complexity can be balanced together in a single interface, addressing one of the most critical challenges in modern AI development.
 
-<Frame>
-  <img src="/images/dria-platform-overview.png" alt="Dria Platform Overview" />
-</Frame>
 
-At its core, Dria consists of:
+How Dria works:
+```mermaid
+graph LR
+    A[Dria Compute Network] --> B[Dria RPC]
+    
+    B --> D[Workflow Orchestrator]
+    D --> E[SDK Interface]
+    D --> F[Factory Tools]
+    F --> E
+    
+    
+    classDef primary fill:#4285F4,stroke:#333,stroke-width:1px,color:white;
+    classDef tertiary fill:#FBBC05,stroke:#333,stroke-width:1px,color:white;
+    
+    class A,B tertiary;
+    class D,E,F primary;
+```
+## Dria Network Architecture Components
 
-- A powerful framework for creating, managing, and orchestrating synthetic data pipelines
-- A sophisticated multi-agent network that can synthesize data from web and siloed sources
-- An extensive factory of built-in tools derived from verified research papers to accelerate data generation
+| Component | Description | Role in the Architecture |
+|-----------|-------------|--------------------------|
+| **Dria Compute Network** | The distributed computing infrastructure that powers Dria's operations | Provides the computational resources necessary for running AI models and data generation tasks at scale, enabling massive parallelization without requiring users to have their own GPU infrastructure |
+| **Dria RPC** | RPC interface that facilitates communication between the compute network and the SDK | Acts as a bridge between the distributed computing resources and the core workflow engine, handling request routing, load balancing, and service discovery |
+| **Workflow Orchestrator** | The core processing component that orchestrates workflow execution and coordinates data generation activities | Manages the execution of workflows, schedules tasks, handles dependencies, and ensures efficient resource utilization across the platform |
+| **Factory Tools** | A collection of specialized tools and algorithms for data generation and manipulation | Provides pre-built components derived from verified research papers that can be incorporated into workflows to accelerate specific types of data generation tasks |
+| **SDK Interface** | Interface that provides a programming interface for users to interact with the Compute Network | Offers a clean, intuitive API for defining workflows, executing data generation tasks, and retrieving results, making the power of the Dria platform accessible through simple Python code |
 
+### How These Components Work Together
+
+1. **User Interaction Flow**:
+   - Users define workflows using the **SDK Interface**
+   - The SDK communicates with the Dria platform through the RPC layer
+
+2. **Workflow Orchestration**:
+   - The **Workflow Orchestrator** analyzes the workflow and determines the execution plan
+   - When a workflow is executed, the request is sent to the **Dria RPC** via SDK
+   - Computation is distributed across the **Dria Compute Network**
+
+3. **Workflow Execution**:
+   - During workflow execution, the **Compute Node** execute the workflow steps as specified by the **Workflow Orchestrator**
+   - All tools and instructions are executed on the **Edge Devices**
+
+4. **Result Return**:
+   - Generated data flows back through the same path
+   - Results are processed by the **Workflow Orchestrator**
+   - Final output is delivered to the user through the **Dria SDK**
+
+This architecture enables Dria to provide powerful, scalable synthetic data generation capabilities while maintaining a simple, accessible interface for users.
 
 ## Understanding Workflows
 
