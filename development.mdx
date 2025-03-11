@@ -1,107 +1,312 @@
 ---
-title: 'Development'
-description: 'Preview changes locally to update your docs'
+title: 'Advanced Development'
+description: 'Take your Dria development to the next level'
 ---
 
-<Info>
-  **Prerequisite**: Please install Node.js (version 19 or higher) before proceeding. <br />
-  Please upgrade to ```docs.json``` before proceeding and delete the legacy ```mint.json``` file.
-</Info>
+## Understanding the Network
 
-Follow these steps to install and run Mintlify on your operating system:
+Dria operates on a distributed network of compute nodes that execute your workflows. Before running intensive tasks, you can check the availability of models across the network to ensure optimal performance.
 
-**Step 1**: Install Mintlify:
+### Checking Model Availability
+
+You can query the current state of the network using the `check_model_availability()` function:
+
+```python
+# Check which models are available on the network
+await dria.check_model_availability()
+```
+
+This function returns a table showing which models are available and how many nodes can execute each model:
+
+```
+Model Availability 
+┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┓
+┃ Model                  ┃ Available Nodes ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━┩
+│ GEMINI_20_FLASH       │ 10             │
+│ GEMINI                │ 10             │
+│ OLLAMA                │ 23             │
+│ TINY_AGENT_3B         │ 13             │
+│ QWEN2_5_7B_FP16       │ 10             │
+│ GEMINI                │ 10             │
+│ ANTHROPIC_HAIKU_3_5_OR│ 5              │
+│ GPT4O_MINI            │ 5              │
+│ OPENAI                │ 5              │
+│ OPENROUTER            │ 5              │
+└─────────────────────────┘
+```
+
+This information helps you select appropriate models based on current network capacity and ensures your workflows can be executed efficiently across the distributed infrastructure.
+
+
+## Advanced Workflows
+
+Dria allows you to create complex workflows for generating synthetic data. This section covers advanced techniques for building sophisticated data generation pipelines.
+
+
+### Sequential Workflows
+Sequential workflows execute steps one after another, with each step using the output of the previous step.
 
 <CodeGroup>
+```python Sequential Example
+from dria import WorkflowTemplate, Dria, Model
 
-  ```bash npm
-  npm i -g mintlify
-  ```
 
-```bash yarn
-yarn global add mintlify
+class SequentialWorkflow(WorkflowTemplate):
+    """
+    A sequential workflow that processes steps one after another.
+    """
+    def define_workflow(self) -> None:
+        # First step generates topics
+        step1 = self.add_step(
+            "Generate topic about {{instruction}}",
+            output="topic" # Output key for first step. Will be used as input for second step.
+        )
+        # Second step generates article about topic
+        step2 = self.add_step(
+            "Write an article about {{topic}}",
+        )
+        self.connect(step1, step2) # Connect the two steps each other.
+
+
+async def main():
+    dria = Dria()
+    return await dria.generate(
+        inputs={
+            "domain": "AI",
+        },
+        workflow=SequentialWorkflow,
+        models=Model.GEMINI_20_FLASH
+    )
+
+
+if __name__ == "__main__":
+    import asyncio
+    print(asyncio.run(main()))
+
 ```
-
 </CodeGroup>
 
-**Step 2**: Navigate to the docs directory (where the `docs.json` file is located) and execute the following command:
+<Note>
+Sequential workflows are ideal for tasks that require a strict order of operations, where each step depends on the output of the previous step.
+</Note>
 
-```bash
-mintlify dev
-```
-
-A local preview of your documentation will be available at `http://localhost:3000`.
-
-### Custom Ports
-
-By default, Mintlify uses port 3000. You can customize the port Mintlify runs on by using the `--port` flag. To run Mintlify on port 3333, for instance, use this command:
-
-```bash
-mintlify dev --port 3333
-```
-
-If you attempt to run Mintlify on a port that's already in use, it will use the next available port:
-
-```md
-Port 3000 is already in use. Trying 3001 instead.
-```
-
-## Mintlify Versions
-
-Please note that each CLI release is associated with a specific version of Mintlify. If your local website doesn't align with the production version, please update the CLI:
+## Multi-Step Pipelines
+Pipelines enables complex data processing with parallel execution of tasks.
 
 <CodeGroup>
+```python Multi-Step Pipeline Example
+from typing import List, Any
 
-```bash npm
-npm i -g mintlify@latest
+from dria import WorkflowTemplate, Dria, Model, TaskResult
+
+
+class MainTopicWorkflow(WorkflowTemplate):
+    def define_workflow(self) -> None:
+        # Generate main topic
+        self.add_step("Generate a main topic about {{domain}}")
+
+    def callback(self, result: List[TaskResult]) -> Any:
+        return [{"main_topic": r.result} for r in result]
+
+class SubtopicsWorkflow(WorkflowTemplate):
+    def define_workflow(self) -> None:
+        # Generate subtopics based on the main topic
+        self.add_step("List smaller subtopics related to {{main_topic}}")
+
+    def callback(self, result: List[TaskResult]) -> Any:
+        return [{"subtopics": r.result} for r in result]
+
+class ContentWorkflow(WorkflowTemplate):
+    def define_workflow(self) -> None:
+        # Generate content for each subtopic
+        self.add_step("Write a short paragraph about {{subtopics}}")
+
+async def main():
+    dria = Dria()
+    return await dria.generate(
+        inputs={
+            "domain": "AI",
+        },
+        workflow=[MainTopicWorkflow, SubtopicsWorkflow, ContentWorkflow],
+        # Each model is matched with same index on workflow list.
+        # MainTopicWorkflow -> Model.GPT4O
+        # SubtopicsWorkflow -> Model.GEMINI_20_FLASH
+        # ContentWorkflow -> Model.ANTHROPIC_SONNET_3_5_OR
+        models=[Model.GPT4O, Model.GEMINI_20_FLASH, Model.ANTHROPIC_SONNET_3_5_OR]
+    )
+
+
+if __name__ == "__main__":
+    import asyncio
+    print(asyncio.run(main()))
+
 ```
-
-```bash yarn
-yarn global upgrade mintlify
-```
-
 </CodeGroup>
-
-## Validating Links
-
-The CLI can assist with validating reference links made in your documentation. To identify any broken links, use the following command:
-
-```bash
-mintlify broken-links
-```
-
-## Deployment
 
 <Tip>
-  Unlimited editors available under the [Pro
-  Plan](https://mintlify.com/pricing) and above.
+Parallel processing is particularly effective for handling multiple independent subtasks simultaneously, significantly improving execution time for complex workflows.
+You can decide each workflow's configuration separately.
 </Tip>
 
-If the deployment is successful, you should see the following:
+## Web Search Grounded Workflows
+Web search grounded workflows integrate real-world information into your synthetic data generation, ensuring accuracy and relevance.
 
-<Frame>
-  <img src="/images/checks-passed.png" style={{ borderRadius: '0.5rem' }} />
-</Frame>
+<CodeGroup>
+```python Web Search Example
+from dria_workflows import Operator
 
-## Code Formatting
+from dria import WorkflowTemplate, Dria, Model
 
-We suggest using extensions on your IDE to recognize and format MDX. If you're a VSCode user, consider the [MDX VSCode extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx) for syntax highlighting, and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting.
+class WebGroundedWorkflow(WorkflowTemplate):
+    def define_workflow(self) -> None:
+        # Search step to gather real-world information
+        search_step = self.add_step(
+            prompt="{{topic}}",
+            operation=Operator.SEARCH,
+            search_type="search", # search is default option. You can change to "news" or "scholar" for be more specific.
+            search_lang="en",
+            search_n_results=5, # Use top 5 search results
+            output="search_results"
+        )
 
-## Troubleshooting
+        # Analysis step to process search results
+        analysis_step = self.add_step(
+            prompt="Analyze these search results and identify key trends: {{search_results}}",
+            output="analysis"
+        )
 
-<AccordionGroup>
-  <Accordion title='Error: Could not load the "sharp" module using the darwin-arm64 runtime'>
+        # Content generation step
+        content_step = self.add_step(
+            prompt="Using this analysis {{analysis}}, generate detailed content about {{topic}}",
+            output="final_content"
+        )
 
-    This may be due to an outdated version of node. Try the following:
-    1. Remove the currently-installed version of mintlify: `npm remove -g mintlify`
-    2. Upgrade to Node v19 or higher.
-    3. Reinstall mintlify: `npm install -g mintlify`
-  </Accordion>
+        # Connect all steps
+        self.connect(search_step, analysis_step)
+        self.connect(analysis_step, content_step)
 
-  <Accordion title="Issue: Encountering an unknown error">
-  
-    Solution: Go to the root of your device and delete the \~/.mintlify folder. Afterwards, run `mintlify dev` again.
-  </Accordion>
-</AccordionGroup>
+async def main():
+    dria = Dria()
+    return await dria.generate(
+        inputs={
+            "topic": "AI",
+        },
+        workflow=WebGroundedWorkflow,
+        models=Model.GEMINI
+    )
 
-Curious about what changed in the CLI version? [Check out the CLI changelog.](https://www.npmjs.com/package/mintlify?activeTab=versions)
+
+if __name__ == "__main__":
+    import asyncio
+    print(asyncio.run(main()))
+
+```
+</CodeGroup>
+
+<Warning>
+When using web search grounded workflows, ensure your search queries are specific enough to return relevant results.
+</Warning>
+
+<Info>
+These workflow patterns can be combined and nested to create sophisticated data generation pipelines tailored to your specific needs.
+</Info>
+
+### Structured Outputs
+
+For generating data in specific formats:
+
+```python
+from dria.functions import structured_output
+
+# Define the output schema
+schema = {
+    "type": "object",
+    "properties": {
+        "title": {"type": "string"},
+        "sections": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "heading": {"type": "string"},
+                    "content": {"type": "string"}
+                }
+            }
+        },
+        "tags": {
+            "type": "array",
+            "items": {"type": "string"}
+        }
+    }
+}
+
+# Use structured output in your workflow
+builder = WorkflowBuilder(instruction="Write an article about AI")
+
+builder.generative_step(
+    id="generate_structured_article",
+    prompt="Write an article about {{instruction}} with sections and tags",
+    operator=Operator.GENERATION,
+    function=structured_output(schema),
+    outputs=[Write.new("structured_article")],
+)
+
+flow = [Edge(source="generate_structured_article", target="_end")]
+builder.flow(flow)
+```
+
+## Model Selection
+
+Dria allows you to select specific models for different tasks in your workflows.
+
+```python
+from dria.models import ModelSelector
+
+# Create a workflow with specific model selection
+builder = WorkflowBuilder(instruction="Analyze complex scientific text")
+
+# Use a powerful model for complex analysis
+builder.generative_step(
+    id="complex_analysis",
+    prompt="Provide a detailed analysis of this scientific concept: {{instruction}}",
+    operator=Operator.GENERATION,
+    model=ModelSelector.claude_3_opus(),  # Specify a powerful model
+    outputs=[Write.new("analysis")],
+)
+
+# Use a faster model for summarization
+builder.generative_step(
+    id="summarize",
+    prompt="Summarize this analysis in simple terms: {{analysis}}",
+    operator=Operator.GENERATION,
+    model=ModelSelector.claude_3_haiku(),  # Specify a faster model
+    outputs=[Write.new("summary")],
+)
+
+flow = [
+    Edge(source="complex_analysis", target="summarize"),
+    Edge(source="summarize", target="_end")
+]
+
+builder.flow(flow)
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Factory Tools"
+    icon="toolbox"
+    href="/factory/simple/"
+  >
+    Explore pre-built tools for specialized data generation
+  </Card>
+  <Card
+    title="Run a Node"
+    icon="server"
+    href="/node/"
+  >
+    Contribute to the Dria network by running a node
+  </Card>
+</CardGroup>

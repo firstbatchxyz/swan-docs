@@ -1,0 +1,468 @@
+---
+title: 'Data Generation'
+description: 'Techniques for generating high-quality synthetic data with Dria'
+---
+
+## Synthetic Data Generation with Dria
+
+Dria provides powerful tools for generating synthetic data that can be used for a variety of purposes, including:
+
+- Training and fine-tuning AI models
+- Testing and evaluation
+- Data augmentation
+- Privacy-preserving data sharing
+- Addressing data imbalance and bias
+
+This guide covers key techniques and best practices for generating high-quality synthetic data with Dria.
+
+## Data Generation Strategies
+
+### 1. Prompt Engineering
+
+The quality of your synthetic data depends heavily on the prompts you use. Here are some techniques for effective prompt engineering:
+
+<AccordionGroup>
+  <Accordion icon="pencil" title="Clear Instructions">
+    Provide clear, specific instructions in your prompts:
+    
+    ```python
+    builder.generative_step(
+        id="generate_customer_review",
+        prompt="""
+        Generate a realistic customer review for a smartphone with the following characteristics:
+        - Product: {{product_name}}
+        - Rating: {{rating}} out of 5 stars
+        - Length: 100-150 words
+        - Tone: {{tone}}
+        - Include at least one specific feature the customer liked
+        - Include at least one specific feature the customer disliked
+        
+        Output only the review text, nothing else.
+        """,
+        operator=Operator.GENERATION,
+        outputs=[Write.new("review")],
+    )
+    ```
+  </Accordion>
+  
+  <Accordion icon="list-check" title="Few-Shot Examples">
+    Include examples in your prompts to guide the model:
+    
+    ```python
+    builder.generative_step(
+        id="generate_medical_dialogue",
+        prompt="""
+        Generate a realistic dialogue between a doctor and a patient discussing {{condition}}.
+        
+        Example 1:
+        Doctor: Good morning. What brings you in today?
+        Patient: I've been having these headaches for the past week.
+        Doctor: I'm sorry to hear that. Can you describe the pain?
+        Patient: It's a throbbing pain on the right side of my head.
+        
+        Example 2:
+        Doctor: Hello, how can I help you today?
+        Patient: I've been feeling very tired lately, even after sleeping well.
+        Doctor: How long has this been going on?
+        Patient: About three weeks now.
+        
+        Now generate a new, unique dialogue about {{condition}}:
+        """,
+        operator=Operator.GENERATION,
+        outputs=[Write.new("dialogue")],
+    )
+    ```
+  </Accordion>
+  
+  <Accordion icon="sliders" title="Controlling Output Format">
+    Specify the exact format you want:
+    
+    ```python
+    builder.generative_step(
+        id="generate_structured_data",
+        prompt="""
+        Generate 5 examples of customer data in JSON format with the following fields:
+        - name: Full name
+        - age: Between 18 and 80
+        - email: Valid email address
+        - purchase_history: Array of 1-3 product names
+        
+        Format the output as a valid JSON array.
+        """,
+        operator=Operator.GENERATION,
+        outputs=[Write.new("customer_data")],
+    )
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### 2. Iterative Refinement
+
+Generate data in multiple steps, refining it at each stage:
+
+```python
+builder = WorkflowBuilder(instruction="Generate a complex dataset")
+
+# Step 1: Generate initial data
+builder.generative_step(
+    id="generate_initial",
+    prompt="Generate an initial draft of {{instruction}}",
+    operator=Operator.GENERATION,
+    outputs=[Write.new("initial_data")],
+)
+
+# Step 2: Refine the data
+builder.generative_step(
+    id="refine_data",
+    prompt="Improve this data by adding more detail and ensuring consistency: {{initial_data}}",
+    operator=Operator.GENERATION,
+    outputs=[Write.new("refined_data")],
+)
+
+# Step 3: Validate the data
+builder.generative_step(
+    id="validate_data",
+    prompt="Check this data for errors, inconsistencies, or unrealistic values: {{refined_data}}",
+    operator=Operator.GENERATION,
+    outputs=[Write.new("validation_report")],
+)
+
+# Step 4: Final version
+builder.generative_step(
+    id="final_data",
+    prompt="Create the final version of the data, addressing these issues: {{validation_report}}",
+    operator=Operator.GENERATION,
+    outputs=[Write.new("final_data")],
+)
+
+flow = [
+    Edge(source="generate_initial", target="refine_data"),
+    Edge(source="refine_data", target="validate_data"),
+    Edge(source="validate_data", target="final_data"),
+    Edge(source="final_data", target="_end")
+]
+
+builder.flow(flow)
+```
+
+### 3. Data Enrichment
+
+Enrich your synthetic data with real-world information:
+
+```python
+builder = WorkflowBuilder(topic="Electric Vehicles")
+
+# Search for real-world information
+builder.search_step(
+    id="web_search",
+    query="latest developments in {{topic}}",
+    operator=Operator.WEB_SEARCH,
+    outputs=[Write.new("search_results")],
+)
+
+# Generate data grounded in real information
+builder.generative_step(
+    id="generate_grounded_data",
+    prompt="""
+    Using this information: {{search_results}}
+    
+    Generate 5 realistic news headlines about {{topic}} that could appear in major publications.
+    Each headline should be factually accurate and reflect current trends.
+    """,
+    operator=Operator.GENERATION,
+    outputs=[Write.new("headlines")],
+)
+
+flow = [
+    Edge(source="web_search", target="generate_grounded_data"),
+    Edge(source="generate_grounded_data", target="_end")
+]
+
+builder.flow(flow)
+```
+
+### 4. Diversity and Variation
+
+Generate diverse data by explicitly requesting variation:
+
+```python
+builder = WorkflowBuilder(base_scenario="A customer service interaction")
+
+builder.generative_step(
+    id="generate_diverse_scenarios",
+    prompt="""
+    Generate 10 variations of {{base_scenario}} with different:
+    - Customer demographics (age, gender, background)
+    - Customer issues (technical problem, billing question, product inquiry)
+    - Emotional states (calm, frustrated, confused)
+    - Complexity levels (simple to complex)
+    
+    Format each scenario as a brief description.
+    """,
+    operator=Operator.GENERATION,
+    outputs=[Write.new("diverse_scenarios")],
+)
+```
+
+## Specialized Data Generation
+
+### Text Data
+
+Generate various types of text data:
+
+<Tabs>
+  <Tab title="Conversations">
+    ```python
+    builder.generative_step(
+        id="generate_conversation",
+        prompt="""
+        Generate a realistic conversation between two people discussing {{topic}}.
+        The conversation should have 10-15 turns and include natural elements like:
+        - Questions and answers
+        - Agreements and disagreements
+        - Interruptions
+        - Filler words and hesitations
+        
+        Format as:
+        Person A: [text]
+        Person B: [text]
+        """,
+        operator=Operator.GENERATION,
+        outputs=[Write.new("conversation")],
+    )
+    ```
+  </Tab>
+  <Tab title="Articles">
+    ```python
+    builder.generative_step(
+        id="generate_article",
+        prompt="""
+        Write a news article about {{event}} with:
+        - A compelling headline
+        - 4-5 paragraphs of content
+        - Quotes from at least 2 different sources
+        - Background information on the topic
+        - A conclusion that summarizes the key points
+        """,
+        operator=Operator.GENERATION,
+        outputs=[Write.new("article")],
+    )
+    ```
+  </Tab>
+  <Tab title="Q&A Pairs">
+    ```python
+    builder.generative_step(
+        id="generate_qa_pairs",
+        prompt="""
+        Generate 10 question-answer pairs about {{topic}}.
+        Include a mix of:
+        - Factual questions
+        - Opinion-based questions
+        - Simple and complex questions
+        
+        Format as:
+        Q1: [question]
+        A1: [answer]
+        """,
+        operator=Operator.GENERATION,
+        outputs=[Write.new("qa_pairs")],
+    )
+    ```
+  </Tab>
+</Tabs>
+
+### Structured Data
+
+Generate structured data in specific formats:
+
+```python
+from dria.functions import structured_output
+
+# Define the schema
+schema = {
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "id": {"type": "string"},
+            "name": {"type": "string"},
+            "age": {"type": "integer", "minimum": 18, "maximum": 80},
+            "occupation": {"type": "string"},
+            "income": {"type": "number", "minimum": 0},
+            "education": {"type": "string"},
+            "interests": {"type": "array", "items": {"type": "string"}}
+        },
+        "required": ["id", "name", "age", "occupation"]
+    }
+}
+
+# Generate structured data
+builder.generative_step(
+    id="generate_structured_data",
+    prompt="Generate 10 examples of diverse user profiles",
+    operator=Operator.GENERATION,
+    function=structured_output(schema),
+    outputs=[Write.new("user_profiles")],
+)
+```
+
+## Quality Control
+
+### Model-as-a-Judge
+
+Use a model to evaluate and filter generated data:
+
+```python
+builder = WorkflowBuilder(instruction="Generate medical case studies")
+
+# Generate initial data
+builder.generative_step(
+    id="generate_case_studies",
+    prompt="Generate 5 detailed medical case studies about {{instruction}}",
+    operator=Operator.GENERATION,
+    outputs=[Write.new("case_studies")],
+)
+
+# Evaluate the quality
+builder.generative_step(
+    id="evaluate_quality",
+    prompt="""
+    Evaluate these medical case studies for:
+    1. Medical accuracy
+    2. Realism
+    3. Educational value
+    4. Ethical considerations
+    
+    For each case study, provide a score from 1-10 and brief explanation.
+    
+    Case studies:
+    {{case_studies}}
+    """,
+    operator=Operator.GENERATION,
+    outputs=[Write.new("evaluation")],
+)
+
+# Filter based on quality
+builder.generative_step(
+    id="filter_case_studies",
+    prompt="""
+    Based on this evaluation:
+    {{evaluation}}
+    
+    Select only the case studies that scored 8 or higher.
+    
+    Original case studies:
+    {{case_studies}}
+    """,
+    operator=Operator.GENERATION,
+    outputs=[Write.new("filtered_case_studies")],
+)
+
+flow = [
+    Edge(source="generate_case_studies", target="evaluate_quality"),
+    Edge(source="evaluate_quality", target="filter_case_studies"),
+    Edge(source="filter_case_studies", target="_end")
+]
+
+builder.flow(flow)
+```
+
+## Advanced Techniques
+
+### Factory Tools
+
+Dria provides pre-built factory tools for specialized data generation:
+
+```python
+from dria.factory import SimpleGenerator, ClairGenerator, CodeGenerator
+
+# Use the Simple Generator for basic text generation
+simple_gen = SimpleGenerator(dria_client)
+result = simple_gen.generate(prompt="Write a short story about time travel")
+
+# Use CLAIR for more complex, reasoning-based generation
+clair_gen = ClairGenerator(dria_client)
+result = clair_gen.generate(
+    instruction="Explain quantum computing to a high school student",
+    criteria="Clear, accurate, engaging, appropriate for the audience"
+)
+
+# Generate code examples
+code_gen = CodeGenerator(dria_client)
+result = code_gen.generate(
+    instruction="Write a Python function to find the longest palindrome in a string",
+    language="python"
+)
+```
+
+### Scaling Data Generation
+
+Use pipelines to scale your data generation:
+
+```python
+# Define pipeline steps for massive data generation
+class TopicGeneratorStep(StepTemplate):
+    def create_workflow(self, domain: str) -> Workflow:
+        builder = WorkflowBuilder(domain=domain)
+        builder.generative_step(
+            id="generate_topics",
+            prompt="Generate 20 specific topics related to {{domain}}. Output as a Python list.",
+            operator=Operator.GENERATION,
+            outputs=[Write.new("topics")],
+        )
+        flow = [Edge(source="generate_topics", target="_end")]
+        builder.flow(flow)
+        builder.set_return_value("topics")
+        return builder.build()
+
+class ContentGeneratorStep(StepTemplate):
+    def create_workflow(self, topic: str) -> Workflow:
+        builder = WorkflowBuilder(topic=topic)
+        builder.generative_step(
+            id="generate_content",
+            prompt="Write a detailed article about {{topic}}",
+            operator=Operator.GENERATION,
+            outputs=[Write.new("content")],
+        )
+        flow = [Edge(source="generate_content", target="_end")]
+        builder.flow(flow)
+        builder.set_return_value("content")
+        return builder.build()
+
+# Build a pipeline that can generate hundreds of articles
+dria = Dria()
+pipeline_builder = PipelineBuilder(dria)
+pipeline_builder.input(domain="Artificial Intelligence")
+pipeline_builder << TopicGeneratorStep().scatter() << ContentGeneratorStep()
+pipeline = pipeline_builder.build()
+result = pipeline.run()
+```
+
+## Best Practices
+
+1. **Start Small**: Begin with small-scale generation and gradually scale up
+2. **Validate Quality**: Implement quality checks at each stage of generation
+3. **Ensure Diversity**: Explicitly request diversity in your prompts
+4. **Ground in Reality**: Use web search to ground your data in real-world information
+5. **Iterate and Refine**: Continuously improve your generation process based on results
+
+## Next Steps
+
+Now that you understand data generation techniques in Dria, you can:
+
+<CardGroup cols={2}>
+  <Card
+    title="Structured Outputs"
+    icon="code"
+    href="/essentials/structured-outputs"
+  >
+    Learn how to generate data in specific formats
+  </Card>
+  <Card
+    title="Web Search"
+    icon="globe"
+    href="/essentials/web-search"
+  >
+    Discover how to ground your data in real-world information
+  </Card>
+</CardGroup> 

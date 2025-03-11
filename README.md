@@ -1,32 +1,43 @@
-# Mintlify Starter Kit
+# Dria Documentation
 
-Click on `Use this template` to copy the Mintlify starter kit. The starter kit contains examples including
+[![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://docs.dria.com)
+[![Twitter Follow](https://img.shields.io/twitter/follow/DriaAI?style=social)](https://twitter.com/DriaAI)
 
-- Guide pages
-- Navigation
-- Customizations
-- API Reference pages
-- Use of popular components
+## Overview
 
-### Development
+This repository contains the documentation for Dria, the synthetic data infrastructure for AI development. Dria allows you to balance data quality, diversity, and complexity all together in a single interface.
 
-Install the [Mintlify CLI](https://www.npmjs.com/package/mintlify) to preview the documentation changes locally. To install, use the following command
+## Documentation Structure
 
-```
-npm i -g mintlify
-```
+This documentation covers:
 
-Run the following command at the root of your documentation (where docs.json is)
+- Getting started with Dria
+- Core concepts and architecture
+- Workflow creation and management
+- API reference and examples
+- Best practices and tutorials
 
-```
-mintlify dev
-```
+## Local Development
 
-### Publishing Changes
+To run the documentation site locally:
 
-Install our Github App to auto propagate changes from your repo to your deployment. Changes will be deployed to production automatically after pushing to the default branch. Find the link to install on your dashboard. 
+1. Clone this repository
+   ```bash
+   git clone https://github.com/firstbatchxyz/dria-sdk-docs.git
+   cd dria-sdk-docs
+   ```
 
-#### Troubleshooting
+2. Install dependencies
+   ```bash
+   npm install
+   ```
 
-- Mintlify dev isn't running - Run `mintlify install` it'll re-install dependencies.
-- Page loads as a 404 - Make sure you are running in a folder with `docs.json`
+3. Start the development server
+   ```bash
+   npm run dev
+   ```
+
+4. Open your browser and navigate to `http://localhost:3000`
+
+The documentation site will automatically reload when you make changes to the content.
+

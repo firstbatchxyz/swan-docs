@@ -1,0 +1,194 @@
+---
+title: 'Workflows'
+description: 'Understanding and building workflows in Dria'
+---
+
+## What are Workflows?
+
+In Dria, a workflow is a sequence of steps that define how data is generated, processed, and transformed. Workflows are the building blocks of pipelines and allow you to create complex data generation processes.
+
+## Workflow Components
+
+A workflow in Dria consists of several key components:
+
+### 1. Steps
+
+Steps are individual operations in a workflow. Each step performs a specific task, such as generating text, searching the web, or transforming data.
+
+Common types of steps include:
+
+- **Generative Steps**: Generate text using language models
+- **Search Steps**: Retrieve information from the web
+- **Function Steps**: Execute custom functions for data processing
+- **Decision Steps**: Control flow based on conditions
+
+### 2. Flow
+
+The flow defines the connections between steps, determining the order of execution and how data flows from one step to another.
+
+### 3. Inputs and Outputs
+
+Each step can have inputs (data it receives) and outputs (data it produces). Outputs from one step can be used as inputs to subsequent steps.
+
+## Building a Workflow
+
+Workflows are built using the `WorkflowBuilder` class. Here's a simple example:
+
+```python
+from dria_workflows import *
+
+# Create a workflow builder
+builder = WorkflowBuilder(instruction="Generate a story about space exploration")
+
+# Add a generative step
+builder.generative_step(
+    id="generate_story",
+    prompt="Write a short story about {{instruction}}",
+    operator=Operator.GENERATION,
+    outputs=[Write.new("story")],
+)
+
+# Define the flow
+flow = [Edge(source="generate_story", target="_end")]
+builder.flow(flow)
+
+# Set the return value
+builder.set_return_value("story")
+
+# Build the workflow
+workflow = builder.build()
+```
+
+## Step Types
+
+### Generative Steps
+
+Generative steps use language models to generate text based on prompts:
+
+```python
+builder.generative_step(
+    id="generate_content",
+    prompt="Write a paragraph about {{topic}}",
+    operator=Operator.GENERATION,
+    outputs=[Write.new("content")],
+)
+```
+
+### Search Steps
+
+Search steps retrieve information from the web:
+
+```python
+builder.search_step(
+    id="web_search",
+    query="latest developments in {{topic}}",
+    operator=Operator.WEB_SEARCH,
+    outputs=[Write.new("search_results")],
+)
+```
+
+### Function Steps
+
+Function steps execute custom functions:
+
+```python
+def process_data(data):
+    # Process the data
+    return processed_data
+
+builder.function_step(
+    id="process_data",
+    function=process_data,
+    inputs={"data": "{{raw_data}}"},
+    outputs=[Write.new("processed_data")],
+)
+```
+
+## Flow Control
+
+The flow of a workflow is defined using `Edge` objects, which connect steps together:
+
+```python
+flow = [
+    Edge(source="step1", target="step2"),
+    Edge(source="step2", target="step3"),
+    Edge(source="step3", target="_end")
+]
+builder.flow(flow)
+```
+
+You can also create conditional flows:
+
+```python
+flow = [
+    Edge(source="step1", target="step2"),
+    Edge(source="step2", target="step3", condition="{{condition}} == true"),
+    Edge(source="step2", target="step4", condition="{{condition}} == false"),
+    Edge(source="step3", target="_end"),
+    Edge(source="step4", target="_end")
+]
+builder.flow(flow)
+```
+
+## Template Variables
+
+Dria uses a template system with double curly braces `{{variable}}` to reference variables within prompts and conditions:
+
+```python
+builder.generative_step(
+    id="generate_content",
+    prompt="Write a paragraph about {{topic}} with a focus on {{aspect}}",
+    operator=Operator.GENERATION,
+    outputs=[Write.new("content")],
+)
+```
+
+## Executing Workflows
+
+Once a workflow is built, it can be executed using the Dria client:
+
+```python
+from dria.client import Dria
+
+# Initialize the Dria client
+dria = Dria()
+
+# Execute the workflow
+result = dria.execute(workflow, inputs={"topic": "Artificial Intelligence", "aspect": "ethics"})
+
+# Print the result
+print(result)
+```
+
+## Best Practices
+
+1. **Use Descriptive IDs**: Give your steps clear, descriptive IDs to make your workflow easier to understand and debug.
+
+2. **Keep Prompts Clear**: Write clear, specific prompts for generative steps to get the best results.
+
+3. **Handle Errors**: Consider what might go wrong in your workflow and add error handling where appropriate.
+
+4. **Test Incrementally**: Build and test your workflow incrementally, adding one step at a time.
+
+5. **Reuse Workflows**: Create reusable workflows for common tasks to improve efficiency.
+
+## Next Steps
+
+Now that you understand the basics of workflows, you can:
+
+<CardGroup cols={2}>
+  <Card
+    title="Build Pipelines"
+    icon="diagram-project"
+    href="/essentials/pipelines"
+  >
+    Learn how to combine workflows into pipelines for complex data generation
+  </Card>
+  <Card
+    title="Explore Models"
+    icon="robot"
+    href="/essentials/models"
+  >
+    Discover the different models available in Dria
+  </Card>
+</CardGroup> 

@@ -1,71 +1,136 @@
 ---
-title: Introduction
-description: "Welcome to the home of your new documentation"
+title: Introduction to Dria
+description: "The synthetic data infrastructure for AI development"
 ---
 
-<img
-  className="block dark:hidden"
-  src="/images/hero-light.png"
-  alt="Hero Light"
-/>
-<img
-  className="hidden dark:block"
-  src="/images/hero-dark.png"
-  alt="Hero Dark"
-/>
+## What is Dria?
 
-## Setting up
+Dria is a comprehensive synthetic data infrastructure platform designed to revolutionize AI development. It provides a unique ecosystem where data quality, diversity, and complexity can be balanced together in a single interface, addressing one of the most critical challenges in modern AI development.
 
-The first step to world-class documentation is setting up your editing environments.
+<Frame>
+  <img src="/images/dria-platform-overview.png" alt="Dria Platform Overview" />
+</Frame>
+
+At its core, Dria consists of:
+
+- A powerful framework for creating, managing, and orchestrating synthetic data pipelines
+- A sophisticated multi-agent network that can synthesize data from web and siloed sources
+- An extensive factory of built-in tools derived from verified research papers to accelerate data generation
+
+
+## Understanding Workflows
+
+Workflows are the fundamental building blocks of Dria's data generation system:
+
+<Steps>
+  <Step title="Define Your Workflow">
+    A workflow is a structured sequence of steps that defines how synthetic data is generated, processed, and validated.
+  </Step>
+  <Step title="Compose Modular Components">
+    Complex data generation tasks are broken down into modular components that can be combined and reused across different projects.
+  </Step>
+  <Step title="Customize for Your Needs">
+    Each workflow can be tailored to specific data requirements, allowing precise control over the generation process.
+  </Step>
+  <Step title="Orchestrate Execution">
+    Dria manages the execution of workflows, handling dependencies, parallelization, and resource allocation automatically.
+  </Step>
+</Steps>
+
+## Why use Dria?
+
+Dria provides the scalable and versatile tools you need to accelerate your AI development with high-quality, diverse synthetic datasets:
 
 <CardGroup cols={2}>
   <Card
-    title="Edit Your Docs"
-    icon="pen-to-square"
-    href="https://mintlify.com/docs/quickstart"
+    title="Massive Parallelization"
+    icon="server"
   >
-    Get your docs set up locally for easy development
+    Offload your compute needs to the network, leveraging massive parallelization without requiring personal GPU infrastructure
   </Card>
   <Card
-    title="Preview Changes"
-    icon="image"
-    href="https://mintlify.com/docs/development"
+    title="Flexible Custom Pipelines"
+    icon="diagram-project"
   >
-    Preview your changes before you push to make sure they're perfect
+    Design complex data generation workflows tailored to your specific needs, all without requiring your own GPUs
+  </Card>
+  <Card
+    title="Extensive Factory"
+    icon="toolbox"
+  >
+    Access a factory of built-in tools derived from verified research papers to significantly speed up the data generation process
+  </Card>
+  <Card
+    title="Grounded in Reality"
+    icon="globe"
+  >
+    Create pipelines where AI can search for grounding in the web or siloed APIs, allowing you to create diverse synthetic data with real-life distribution
   </Card>
 </CardGroup>
 
-## Make it yours
 
-Update your docs to your brand and add valuable content for the best user conversion.
+## Getting Started
+
+To begin using Dria, you'll need to:
+
+<Steps>
+  <Step title="Install the SDK">
+    Dria works with Python 3.10 or higher and can be installed via pip:
+    ```bash
+    pip install dria
+    ```
+    
+    Or using conda:
+    ```bash
+    conda create -n dria python=3.10
+    conda activate dria
+    pip install dria
+    ```
+  </Step>
+  <Step title="Create Your First Workflow">
+    Define the steps needed to generate your synthetic data using our intuitive workflow API.
+    ```python
+    from dria import Dria, WorkflowTemplate, Model
+
+    class SimpleWorkflow(WorkflowTemplate):
+        def define_workflow(self) -> None:
+            self.add_step("Write a short story about a {{topic}}")
+    ```
+  </Step>
+  <Step title="Generate Synthetic Data">
+    Execute your workflow and collect the generated data through our simple interface.
+    ```python
+    dria = Dria()
+    result = asyncio.run(dria.generate(
+        inputs={"topic": "an apple"},
+        workflow=SimpleWorkflow,
+        models=Model.GEMINI
+    ))
+    ```
+  </Step>
+</Steps>
+
+## Next Steps
+
+Check out our documentation to learn more about Dria's capabilities and how to leverage them for your AI development needs.
 
 <CardGroup cols={2}>
   <Card
-    title="Customize Style"
-    icon="palette"
-    href="https://mintlify.com/docs/settings/global"
+    title="Quickstart Guide"
+    icon="bolt"
+    href="/quickstart"
   >
-    Customize your docs to your company's colors and brands
+    Get up and running with Dria in minutes
   </Card>
   <Card
-    title="Reference APIs"
+    title="Pipeline Examples"
     icon="code"
-    href="https://mintlify.com/docs/api-playground/openapi"
+    href="/essentials/code"
   >
-    Automatically generate endpoints from an OpenAPI spec
-  </Card>
-  <Card
-    title="Add Components"
-    icon="screwdriver-wrench"
-    href="https://mintlify.com/docs/content/components/accordions"
-  >
-    Build interactive features and designs to guide your users
-  </Card>
-  <Card
-    title="Get Inspiration"
-    icon="stars"
-    href="https://mintlify.com/customers"
-  >
-    Check out our showcase of our favorite documentation
+    Explore example pipelines for different use cases
   </Card>
 </CardGroup>
+
+<Feedback>
+  Was this documentation helpful? Let us know how we can improve it further.
+</Feedback>

@@ -1,0 +1,248 @@
+---
+title: 'Pipelines'
+description: 'Building and managing data generation pipelines in Dria'
+---
+
+## What are Pipelines?
+
+Pipelines in Dria are a way to orchestrate multiple workflows together to create complex data generation processes. They allow you to:
+
+1. **Connect multiple workflows** in a sequence
+2. **Process data in parallel** using Dria's distributed network
+3. **Transform data** between workflow steps
+4. **Scale** your data generation efficiently
+
+## Pipeline Architecture
+
+A Dria pipeline consists of:
+
+1. **Steps**: Each step is a `StepTemplate` that defines a workflow
+2. **Connections**: How steps are connected and how data flows between them
+3. **Callbacks**: Functions that transform data between steps
+4. **Inputs/Outputs**: The data that flows into and out of the pipeline
+
+## Creating a Pipeline
+
+### Step 1: Define Pipeline Steps
+
+Each step in a pipeline is a class that inherits from `StepTemplate` and implements the `create_workflow` method:
+
+```python
+from dria_workflows import *
+from dria.pipelines import StepTemplate
+
+class TopicGeneratorStep(StepTemplate):
+    def create_workflow(self, seed_topic: str) -> Workflow:
+        builder = WorkflowBuilder(seed_topic=seed_topic)
+        builder.generative_step(
+            id="generate_topics",
+            prompt="Generate 5 subtopics related to {{seed_topic}}. Output as a Python list.",
+            operator=Operator.GENERATION,
+            outputs=[Write.new("topics")],
+        )
+        flow = [Edge(source="generate_topics", target="_end")]
+        builder.flow(flow)
+        builder.set_return_value("topics")
+        return builder.build()
+```
+
+### Step 2: Build the Pipeline
+
+Use the `PipelineBuilder` to connect the steps:
+
+```python
+from dria.client import Dria
+from dria.pipelines import PipelineBuilder
+
+# Initialize Dria client
+dria = Dria()
+
+# Create pipeline builder
+pipeline_builder = PipelineBuilder(dria)
+
+# Set input
+pipeline_builder.input(seed_topic="Artificial Intelligence")
+
+# Add steps to pipeline
+pipeline_builder << TopicGeneratorStep()
+
+# Build pipeline
+pipeline = pipeline_builder.build()
+```
+
+### Step 3: Run the Pipeline
+
+Execute the pipeline to generate data:
+
+```python
+# Run the pipeline
+result = pipeline.run()
+
+# Print the result
+print(result)
+```
+
+## Pipeline Patterns
+
+### Sequential Pipeline
+
+Steps are executed one after another:
+
+```python
+pipeline_builder << FirstStep() << SecondStep() << ThirdStep()
+```
+
+### Parallel Processing with Scatter
+
+The scatter pattern allows you to process multiple items in parallel:
+
+```python
+pipeline_builder << TopicGeneratorStep().scatter() << ContentGeneratorStep()
+```
+
+This will:
+1. Generate multiple topics in `TopicGeneratorStep`
+2. Process each topic in parallel in `ContentGeneratorStep`
+
+### Aggregation with Aggregate
+
+The aggregate pattern combines multiple outputs into a single input:
+
+```python
+pipeline_builder << TopicGeneratorStep().scatter() << ContentGeneratorStep().aggregate() << SummaryStep()
+```
+
+This will:
+1. Generate multiple topics
+2. Process each topic in parallel to generate content
+3. Combine all content and pass it to the summary step
+
+## Callbacks
+
+Callbacks transform data between steps. Dria provides three built-in callbacks:
+
+1. **Scatter**: 1-to-N mapping, processes each item in a list in parallel
+2. **Broadcast**: 1-to-N mapping, duplicates input to multiple tasks
+3. **Aggregate**: N-to-1 mapping, combines multiple outputs into a single input
+
+### Custom Callbacks
+
+You can define custom callbacks by implementing the `callback` method in your `StepTemplate`:
+
+```python
+def callback(self, step: "Step") -> Union[List[TaskInput], TaskInput]:
+    # Process the output of the step
+    outputs = [parse_json(o.result) for o in step.output]
+    
+    # Transform the data
+    transformed = [transform_data(item) for item in outputs]
+    
+    # Return a TaskInput object or a list of TaskInput objects
+    return TaskInput(**{"transformed_data": transformed})
+```
+
+## Complex Pipeline Example
+
+Here's a complete example of a pipeline that:
+1. Generates topics from a seed topic
+2. Generates content for each topic in parallel
+3. Combines the content into a coherent article
+
+```python
+from dria_workflows import *
+from dria.pipelines import StepTemplate, Pipeline, PipelineBuilder
+from dria.client import Dria
+
+# Define pipeline steps
+class TopicGeneratorStep(StepTemplate):
+    def create_workflow(self, seed_topic: str) -> Workflow:
+        builder = WorkflowBuilder(seed_topic=seed_topic)
+        builder.generative_step(
+            id="generate_topics",
+            prompt="Generate 5 subtopics related to {{seed_topic}}. Output as a Python list.",
+            operator=Operator.GENERATION,
+            outputs=[Write.new("topics")],
+        )
+        flow = [Edge(source="generate_topics", target="_end")]
+        builder.flow(flow)
+        builder.set_return_value("topics")
+        return builder.build()
+
+class ContentGeneratorStep(StepTemplate):
+    def create_workflow(self, topic: str) -> Workflow:
+        builder = WorkflowBuilder(topic=topic)
+        builder.generative_step(
+            id="generate_content",
+            prompt="Write a paragraph about {{topic}}",
+            operator=Operator.GENERATION,
+            outputs=[Write.new("content")],
+        )
+        flow = [Edge(source="generate_content", target="_end")]
+        builder.flow(flow)
+        builder.set_return_value("content")
+        return builder.build()
+
+class ArticleGeneratorStep(StepTemplate):
+    def create_workflow(self, contents: list) -> Workflow:
+        builder = WorkflowBuilder(contents=contents)
+        builder.generative_step(
+            id="generate_article",
+            prompt="Combine these paragraphs into a coherent article: {{contents}}",
+            operator=Operator.GENERATION,
+            outputs=[Write.new("article")],
+        )
+        flow = [Edge(source="generate_article", target="_end")]
+        builder.flow(flow)
+        builder.set_return_value("article")
+        return builder.build()
+
+# Initialize Dria client
+dria = Dria()
+
+# Create pipeline builder
+pipeline_builder = PipelineBuilder(dria)
+
+# Set input
+pipeline_builder.input(seed_topic="Climate Change")
+
+# Add steps to pipeline
+pipeline_builder << TopicGeneratorStep().scatter() << ContentGeneratorStep().aggregate() << ArticleGeneratorStep()
+
+# Build pipeline
+pipeline = pipeline_builder.build()
+
+# Run pipeline
+result = pipeline.run()
+
+# Print the result
+print(result)
+```
+
+## Best Practices
+
+1. **Design Before Implementation**: Plan your pipeline structure before coding
+2. **Keep Steps Focused**: Each step should do one thing well
+3. **Handle Errors**: Add error handling to make your pipelines robust
+4. **Monitor Performance**: Use callbacks to monitor pipeline execution
+5. **Optimize for Parallelism**: Design your pipelines to take advantage of parallel processing
+
+## Next Steps
+
+Now that you understand pipelines, you can:
+
+<CardGroup cols={2}>
+  <Card
+    title="Explore Models"
+    icon="robot"
+    href="/essentials/models"
+  >
+    Learn about the different models available in Dria
+  </Card>
+  <Card
+    title="Data Generation"
+    icon="database"
+    href="/essentials/data-generation"
+  >
+    Discover techniques for generating high-quality synthetic data
+  </Card>
+</CardGroup> 
