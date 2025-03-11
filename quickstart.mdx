@@ -125,8 +125,7 @@ if __name__ == "__main__":
 
 In this example:
 - We define a single workflow with 4 sequential steps that execute in order
-- Each step builds on the output of the previous step using the `{{$last_result}}` template variable
-- The special `$last_result` template variable automatically inserts the output from the previous step
+- Each step builds on the output of the previous step using the output key of the previous step
 - The callback simply returns the final result (the article outline), as we're interested in the end product of this sequential process
 
 ## Your First Dria Workflow Pipeline
