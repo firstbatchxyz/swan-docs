@@ -44,6 +44,29 @@ If you encounter any installation issues:
   </Accordion>
 </AccordionGroup>
 
+## Working with simple prompts
+
+Let's start with a simple example that generates a list of creative ideas based on a given prompt.
+
+### Example Prompt
+
+```python
+from dria import Dria, Model
+import asyncio
+
+dria = Dria()
+
+async def main():
+    return await dria.generate(
+        inputs="Generate a list of 5 creative ideas for a new product",
+        models=Model.GEMINI,
+    )
+
+
+if __name__ == "__main__":
+    print(asyncio.run(main()))
+```
+
 ## Creating a Workflow
 
 Before diving into pipelines, let's explore how to create a single workflow with multiple steps.

@@ -59,7 +59,7 @@ class SequentialWorkflow(WorkflowTemplate):
     def define_workflow(self) -> None:
         # First step generates topics
         step1 = self.add_step(
-            "Generate topic about {{instruction}}",
+            "Generate topic about {{domain}}",
             output="topic" # Output key for first step. Will be used as input for second step.
         )
         # Second step generates article about topic
