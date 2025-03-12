@@ -97,9 +97,10 @@ Pipelines enables complex data processing with parallel execution of tasks.
 <CodeGroup>
 ```python Multi-Step Pipeline Example
 from typing import List, Any
+from dria import WorkflowTemplate, Dria, Model, TaskResult, DriaDataset
 
-from dria import WorkflowTemplate, Dria, Model, TaskResult
-
+dataset = DriaDataset(collection="multi_step") # Dataset class is require for multiple workflow execution
+dria = Dria()
 
 class MainTopicWorkflow(WorkflowTemplate):
     def define_workflow(self) -> None:
@@ -123,7 +124,6 @@ class ContentWorkflow(WorkflowTemplate):
         self.add_step("Write a short paragraph about {{subtopics}}")
 
 async def main():
-    dria = Dria()
     return await dria.generate(
         inputs={
             "domain": "AI",
@@ -133,13 +133,15 @@ async def main():
         # MainTopicWorkflow -> Model.GPT4O
         # SubtopicsWorkflow -> Model.GEMINI_20_FLASH
         # ContentWorkflow -> Model.ANTHROPIC_SONNET_3_5_OR
-        models=[Model.GPT4O, Model.GEMINI_20_FLASH, Model.ANTHROPIC_SONNET_3_5_OR]
+        models=[Model.GPT4O, Model.GEMINI_20_FLASH, Model.ANTHROPIC_SONNET_3_5_OR],
+        dataset=dataset
     )
 
 
 if __name__ == "__main__":
     import asyncio
-    print(asyncio.run(main()))
+    asyncio.run(main())
+    print(dataset.get_entries(data_only=True))
 
 ```
 </CodeGroup>
