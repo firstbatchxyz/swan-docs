@@ -1,13 +1,14 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Dria SDK Documentation",
+  "name": "SWAN Guide",
+  "mode": "dark",
   "colors": {
     "primary": "#0D47A1",
     "light": "#2196F3",
     "dark": "#0D47A1"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/Swan Symbol.png",
   "navigation": {
     "tabs": [
       {
@@ -16,108 +17,51 @@
           {
             "group": "Get Started",
             "pages": [
-              "introduction",
-              "quickstart",
-              "development"
+              "introduction"
             ]
           },
           {
             "group": "Core Concepts",
             "pages": [
-              "essentials/workflows",
-              "essentials/pipelines",
-              "essentials/models",
-              "essentials/data-generation"
+              "essentials/agents",
+              "essentials/artifacts",
+              "essentials/periods"
             ]
           },
           {
-            "group": "Advanced",
+            "group": "How to Profit",
             "pages": [
-              "essentials/structured-outputs",
-              "essentials/web-search",
-              "essentials/custom-functions"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "API Reference",
-        "groups": [
-          {
-            "group": "Client",
-            "pages": [
-              "api-reference/client"
-            ]
-          },
-          {
-            "group": "Workflows",
-            "pages": [
-              "api-reference/workflow-builder",
-              "api-reference/operators",
-              "api-reference/steps"
-            ]
-          },
-          {
-            "group": "Pipelines",
-            "pages": [
-              "api-reference/pipeline-builder",
-              "api-reference/step-template",
-              "api-reference/callbacks"
-            ]
-          },
-          {
-            "group": "Factory",
-            "pages": [
-              "api-reference/factory/simple",
-              "api-reference/factory/complex",
-              "api-reference/factory/search"
+              "guides/profit-agent-creator",
+              "guides/profit-artifact-creator"
             ]
           }
         ]
       }
     ],
     "global": {
-      "anchors": [
-        {
-          "anchor": "GitHub",
-          "href": "https://github.com/firstbatchxyz",
-          "icon": "github"
-        },
-        {
-          "anchor": "Discord",
-          "href": "https://discord.gg/dria",
-          "icon": "discord"
-        },
-        {
-          "anchor": "Website",
-          "href": "https://dria.co",
-          "icon": "globe"
-        }
-      ]
+      "anchors": []
     }
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/Swan Symbol.png",
+    "dark": "/Swan Symbol.png"
   },
   "navbar": {
     "links": [
       {
         "label": "Support",
-        "href": "https://discord.gg/dria"
+        "href": "https://t.me/swanforall"
+      },
+      {
+        "label": "Contracts",
+        "href": "https://github.com/firstbatchxyz/swan-contracts"
+      },
+      {
+        "label": "X",
+        "href": "https://x.com/swanforall"
       }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Run a Node",
-      "href": "https://github.com/firstbatchxyz/dkn-compute-node"
-    }
+    ]
   },
   "footer": {
-    "socials": {
-      "github": "https://github.com/firstbatchxyz",
-      "discord": "https://discord.gg/dria",
-      "linkedin": "https://linkedin.com/company/firstbatch"
-    }
   }
 }

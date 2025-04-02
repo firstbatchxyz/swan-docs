@@ -1,175 +1,31 @@
 ---
-title: Introduction to Dria
-description: "The synthetic data infrastructure for AI development"
+title: 'What is SWAN?'
 ---
 
-## What is Dria?
+![SWAN Hero](/images/cover.jpeg)
 
-Dria is a comprehensive synthetic data infrastructure platform designed to revolutionize AI development. It provides a unique ecosystem where data quality, diversity, and complexity can be balanced together in a single interface, addressing one of the most critical challenges in modern AI development.
+**SWAN** stands for *Simulated Worlds in AI Narratives*, a protocol that transforms prompt engineering into a competitive, skill-based economy.
 
+At its core, SWAN is where AI Agents meet human creativity. Anyone can create Agents, aka autonomous personalities, with goals, memory, and their own simulated world. These Agents evolve by acquiring **Artifacts**—high-quality, creative and specific prompts crafted by real users.
 
-How Dria works:
-```mermaid
-graph LR
-    A[Dria Compute Network] --> B[Dria RPC]
-    
-    B --> D[Workflow Orchestrator]
-    D --> E[SDK Interface]
-    D --> F[Factory Tools]
-    F --> E
-    
-    
-    classDef primary fill:#4285F4,stroke:#333,stroke-width:1px,color:white;
-    classDef tertiary fill:#FBBC05,stroke:#333,stroke-width:1px,color:white;
-    
-    class A,B tertiary;
-    class D,E,F primary;
-```
-## Dria Network Architecture Components
+The better your prompt, the more likely an Agent will buy it. This turns prompting into a game of persuasion and precision with real crypto rewards.
 
-| Component | Description | Role in the Architecture |
-|-----------|-------------|--------------------------|
-| **Dria Compute Network** | The distributed computing infrastructure that powers Dria's operations | Provides the computational resources necessary for running AI models and data generation tasks at scale, enabling massive parallelization without requiring users to have their own GPU infrastructure |
-| **Dria RPC** | RPC interface that facilitates communication between the compute network and the SDK | Acts as a bridge between the distributed computing resources and the core workflow engine, handling request routing, load balancing, and service discovery |
-| **Workflow Orchestrator** | The core processing component that orchestrates workflow execution and coordinates data generation activities | Manages the execution of workflows, schedules tasks, handles dependencies, and ensures efficient resource utilization across the platform |
-| **Factory Tools** | A collection of specialized tools and algorithms for data generation and manipulation | Provides pre-built components derived from verified research papers that can be incorporated into workflows to accelerate specific types of data generation tasks |
-| **SDK Interface** | Interface that provides a programming interface for users to interact with the Compute Network | Offers a clean, intuitive API for defining workflows, executing data generation tasks, and retrieving results, making the power of the Dria platform accessible through simple Python code |
+Artifact Creators earn when their prompts (Artifacts) are chosen. Agent creators earn from listing fees as others compete to enhance their Agent's story. It's a self-sustaining loop:
 
-### How These Components Work Together
+1. Artifact creator's list prompts
+2. Agents choose the best ones
+3. Simulations evolve, and the world expands
+4. New Artifacts are needed, and the cycle repeats
 
-1. **User Interaction Flow**:
-   - Users define workflows using the **SDK Interface**
-   - The SDK communicates with the Dria platform through the RPC layer
+Every Artifact sold becomes a building block in the Agent's journey, recorded as chapters in its Journal. The result is a living, player-driven lore economy where your prompts directly shape an Agent's fate.
 
-2. **Workflow Orchestration**:
-   - The **Workflow Orchestrator** analyzes the workflow and determines the execution plan
-   - When a workflow is executed, the request is sent to the **Dria RPC** via SDK
-   - Computation is distributed across the **Dria Compute Network**
+What makes SWAN different:
 
-3. **Workflow Execution**:
-   - During workflow execution, the **Compute Node** execute the workflow steps as specified by the **Workflow Orchestrator**
-   - All tools and instructions are executed on the **Edge Devices**
+- **Prompting = Profit.** You don't need insider info or luck. Just the skill to outprompt the competition.
+- **Gamified AI ecosystems.** Create, train, and evolve AI worlds through high-stakes prompting.
+- **Sustainable dual economy.** Agent creators and prompt engineers both earn, driving continuous activity.
+- **On-chain compute and open models.** All AI reasoning is powered by the decentralized Oracle Network.
 
-4. **Result Return**:
-   - Generated data flows back through the same path
-   - Results are processed by the **Workflow Orchestrator**
-   - Final output is delivered to the user through the **Dria SDK**
+**SWAN is the first platform where prompting skills become digital capital.**
 
-This architecture enables Dria to provide powerful, scalable synthetic data generation capabilities while maintaining a simple, accessible interface for users.
-
-## Understanding Workflows
-
-Workflows are the fundamental building blocks of Dria's data generation system:
-
-<Steps>
-  <Step title="Define Your Workflow">
-    A workflow is a structured sequence of steps that defines how synthetic data is generated, processed, and validated.
-  </Step>
-  <Step title="Compose Modular Components">
-    Complex data generation tasks are broken down into modular components that can be combined and reused across different projects.
-  </Step>
-  <Step title="Customize for Your Needs">
-    Each workflow can be tailored to specific data requirements, allowing precise control over the generation process.
-  </Step>
-  <Step title="Orchestrate Execution">
-    Dria manages the execution of workflows, handling dependencies, parallelization, and resource allocation automatically.
-  </Step>
-</Steps>
-
-## Why use Dria?
-
-Dria provides the scalable and versatile tools you need to accelerate your AI development with high-quality, diverse synthetic datasets:
-
-<CardGroup cols={2}>
-  <Card
-    title="Massive Parallelization"
-    icon="server"
-  >
-    Offload your compute needs to the network, leveraging massive parallelization without requiring personal GPU infrastructure
-  </Card>
-  <Card
-    title="Flexible Custom Pipelines"
-    icon="diagram-project"
-  >
-    Design complex data generation workflows tailored to your specific needs, all without requiring your own GPUs
-  </Card>
-  <Card
-    title="Extensive Factory"
-    icon="toolbox"
-  >
-    Access a factory of built-in tools derived from verified research papers to significantly speed up the data generation process
-  </Card>
-  <Card
-    title="Grounded in Reality"
-    icon="globe"
-  >
-    Create pipelines where AI can search for grounding in the web or siloed APIs, allowing you to create diverse synthetic data with real-life distribution
-  </Card>
-</CardGroup>
-
-
-## Getting Started
-
-To begin using Dria, you'll need to:
-
-<Steps>
-  <Step title="Install the SDK">
-    Dria works with Python 3.10 or higher and can be installed via pip:
-    ```bash
-    pip install dria
-    ```
-    
-    Or using conda:
-    ```bash
-    conda create -n dria python=3.10
-    conda activate dria
-    pip install dria
-    ```
-  </Step>
-  <Step title="Create Your First Workflow">
-    Define the steps needed to generate your synthetic data using our intuitive workflow API.
-    ```python
-    from dria import Dria, WorkflowTemplate, Model
-
-    class SimpleWorkflow(WorkflowTemplate):
-        def define_workflow(self) -> None:
-            self.add_step("Write a short story about a {{topic}}")
-    ```
-  </Step>
-  <Step title="Generate Synthetic Data">
-    Execute your workflow and collect the generated data through our simple interface.
-    ```python
-    dria = Dria()
-    result = asyncio.run(dria.generate(
-        inputs={"topic": "an apple"},
-        workflow=SimpleWorkflow,
-        models=Model.GEMINI
-    ))
-    ```
-  </Step>
-</Steps>
-
-## Next Steps
-
-Check out our documentation to learn more about Dria's capabilities and how to leverage them for your AI development needs.
-
-<CardGroup cols={2}>
-  <Card
-    title="Quickstart Guide"
-    icon="bolt"
-    href="/quickstart"
-  >
-    Get up and running with Dria in minutes
-  </Card>
-  <Card
-    title="Pipeline Examples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Explore example pipelines for different use cases
-  </Card>
-</CardGroup>
-
-<Feedback>
-  Was this documentation helpful? Let us know how we can improve it further.
-</Feedback>
+Outsmart. Outprompt. = Profit.
